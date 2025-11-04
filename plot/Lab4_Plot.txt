@@ -1,0 +1,2 @@
+MSE Gaussian: 0.0096 | MSE S&P: 0.0158
+After filtering, MSE S&P avg=0.0021, med=0.0001

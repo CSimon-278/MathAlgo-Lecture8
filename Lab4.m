@@ -6,7 +6,8 @@ clc;
 I = im2double(rgb2gray(imread('peppers.png')));
 
 %% 1) Add different noise types
-
+% Gaussian noise simulates sensor noise; salt & pepper simulates impulse
+% noise (e.g., dead pixels).
 I_gauss = imnoise(I,'gaussian',0,0.01);
 I_sp = imnoise(I,'salt & pepper',0.05);
 
@@ -15,13 +16,14 @@ montage({I, I_gauss, I_sp},'Size',[1 3]);
 title('Original | Gaussian noise | Salt & pepper noise');
 
 %% 2) Compute simple quality metrics
-
+% Mean Squared Error (MSE) quantifies the distortion introduced by noise.
 MSE_gauss = immse(I_gauss, I);
 MSE_sp = immse(I_sp, I);
 fprintf('MSE Gaussian: %.4f | MSE S&P: %.4f\n', MSE_gauss, MSE_sp);
 
 %% 3) Linear filtering (mean, Gaussian)
-
+% Linear filters smooth the image by averaging pixel values, reducing
+% noise but also blurring edges.
 h_avg = fspecial('average',3);
 I_avg_gauss = imfilter(I_gauss,h_avg,'replicate');
 I_avg_sp = imfilter(I_sp,h_avg,'replicate');
@@ -29,7 +31,8 @@ h_gauss = fspecial('gaussian',[3 3],0.7);
 I_gauss_gauss = imfilter(I_gauss,h_gauss,'replicate');
 
 %% 4) Non-linear filtering (median)
-
+% Median filtering replaces each pixel with the median of its neighborhood,
+% effective for impulse noise.
 I_med_gauss = medfilt2(I_gauss,[3 3]);
 I_med_sp = medfilt2(I_sp,[3 3]);
 
@@ -38,14 +41,19 @@ montage({I_avg_sp, I_med_sp, I_avg_gauss, I_med_gauss},'Size',[2 2]);
 title('Top: Avg vs Median (S&P) | Bottom: Avg vs Median (Gaussian)');
 
 %% 5) Compare metrics after filtering
-
+% Compare how well each filter restores the image using MSE.
 fprintf('After filtering, MSE S&P avg=%.4f, med=%.4f\n',immse(I_avg_sp,I), immse(I_med_sp,I));
 
 %% 6) Reflections
 % - Which noise is best removed by median filter? Why?
-
+% Salt & pepper noise is best removed by the median filter because it
+% targets outlier pixels without affecting surrounding smooth regions.
 
 % - Why does linear filtering blur edges more?
-
+% Linear filters average pixel values uniformly, which smooths transitions
+% at edges, causing blurring.
 
 % - How could we design adaptive filters to preserve detail?
+% Adaptive filters adjust their behavior based on local image characteristics
+% e.g., edge-preserving filters like bilateral or anisotropic diffusion
+% that reduce noise while maintaining sharp transitions.
